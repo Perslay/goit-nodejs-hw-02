@@ -1,25 +1,53 @@
-const express = require('express')
+// module.exports = {
+//   listContacts,
+//   getContactById,
+//   removeContact,
+//   addContact,
+//   updateContact,
+// }
 
-const router = express.Router()
+const contactsFunctions = require("../../models/contacts.js");
+// const contacts = require("../../models/contacts.json");
+// console.log(contacts);
 
-router.get('/', async (req, res, next) => {
-  res.json({ message: 'hewwo world' })
-})
+const express = require("express");
 
-router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+const router = express.Router();
 
-router.post('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/api/contacts", async (req, res, next) => {
+  // niczego nie otrzymuje
+  // wywołuje funkcję listContacts do pracy z plikiem json contacts.json
+  // zwraca tablicę wszystkich kontaktów w formacie json ze statusem 200
+  // res.json({ message: "template message" });
+  try {
+    const contacts = await contactsFunctions.listContacts();
+    res.json({
+      status: "success",
+      code: 200,
+      data: {
+        contacts,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
-router.delete('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/:contactId", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
 
-router.put('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.post("/", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
 
-module.exports = router
+router.delete("/:contactId", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
+
+router.put("/:contactId", async (req, res, next) => {
+  res.json({ message: "template message" });
+});
+
+module.exports = router;
