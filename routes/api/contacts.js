@@ -1,24 +1,10 @@
-// module.exports = {
-//   listContacts,
-//   getContactById,
-//   removeContact,
-//   addContact,
-//   updateContact,
-// }
-
 const contactsFunctions = require("../../models/contacts.js");
-// const contacts = require("../../models/contacts.json");
-// console.log(contacts);
 
 const express = require("express");
 
 const router = express.Router();
 
-router.get("/api/contacts", async (req, res, next) => {
-  // niczego nie otrzymuje
-  // wywołuje funkcję listContacts do pracy z plikiem json contacts.json
-  // zwraca tablicę wszystkich kontaktów w formacie json ze statusem 200
-  // res.json({ message: "template message" });
+router.get("/", async (req, res, next) => {
   try {
     const contacts = await contactsFunctions.listContacts();
     res.json({
@@ -28,9 +14,9 @@ router.get("/api/contacts", async (req, res, next) => {
         contacts,
       },
     });
-  } catch (error) {
-    console.error(error);
-    next(error);
+  } catch (err) {
+    console.error(err);
+    next(err);
   }
 });
 
