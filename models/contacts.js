@@ -15,6 +15,7 @@ const listContacts = async () => {
 
 const getContactById = async (contactId) => {
   let contacts;
+  
   try {
     const data = await fs.readFile(contactsPath);
     contacts = JSON.parse(data);
@@ -32,6 +33,7 @@ const getContactById = async (contactId) => {
 
 const removeContact = async (contactId) => {
   let contacts;
+
   try {
     contacts = await listContacts();
   } catch (err) {
@@ -58,6 +60,7 @@ const removeContact = async (contactId) => {
 
 const addContact = async (body) => {
   let contacts;
+
   try {
     contacts = await listContacts();
   } catch (err) {
@@ -81,7 +84,36 @@ const addContact = async (body) => {
   }
 };
 
-const updateContact = async (contactId, body) => {};
+const updateContact = async (contactId, body) => {
+  let contacts;
+
+  try {
+    contacts = await listContacts();
+  } catch (err) {
+    console.error("Error reading contacts file in updateContact:", err);
+    return null;
+  }
+
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  if (index === -1) {
+    return null;
+  }
+
+  const newContact = {
+    id: uuidv4(),
+    ...body,
+  };
+
+  contacts.splice(index, 1, newContact);
+
+  try {
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return newContact;
+  } catch (err) {
+    console.error("Error writing to contacts file in updateContact:", err);
+    return null;
+  }
+};
 
 module.exports = {
   listContacts,

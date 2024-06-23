@@ -6,7 +6,7 @@ const schema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net", "pl"] },
+      tlds: { allow: ["com", "net"] },
     })
     .required(),
   phone: Joi.number().integer().positive().required(),
@@ -21,9 +21,7 @@ router.get("/", async (req, res, next) => {
     const contacts = await contactsFunctions.listContacts();
     res.json({
       status: 200,
-      data: {
-        contacts,
-      },
+      data: { contacts },
     });
   } catch (err) {
     console.error(err);
@@ -38,9 +36,7 @@ router.get("/:contactId", async (req, res, next) => {
     if (contact) {
       res.json({
         status: 200,
-        data: {
-          contact,
-        },
+        data: { contact },
       });
     } else {
       res.status(404).json({
@@ -66,9 +62,7 @@ router.post("/", async (req, res, next) => {
       const newContact = await contactsFunctions.addContact(req.body);
       res.json({
         status: 201,
-        data: {
-          newContact,
-        },
+        data: { newContact },
       });
     } catch (err) {
       console.error(err);
@@ -99,7 +93,32 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const contactId = req.params.contactId;
+  const { error } = schema.validate(req.body);
+  if (error) {
+    res.status(400).json({
+      status: 400,
+      message: "missing fields",
+    });
+  } else {
+    try {
+      const newContact = await contactsFunctions.updateContact(contactId, req.body);
+      if (newContact) {
+        res.json({
+          status: 200,
+          data: { newContact },
+        });
+      } else {
+        res.status(404).json({
+          status: 404,
+          message: "Not found",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      next(err);
+    }
+  }
 });
 
 module.exports = router;
