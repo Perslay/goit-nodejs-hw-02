@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid");
 const fs = require("fs").promises;
 const path = require("path");
 const contactsPath = path.join(__dirname, "contacts.json");
@@ -32,8 +33,7 @@ const getContactById = async (contactId) => {
 const removeContact = async (contactId) => {
   let contacts;
   try {
-    const data = await fs.readFile(contactsPath);
-    contacts = JSON.parse(data);
+    contacts = await listContacts();
   } catch (err) {
     console.error("Error reading contacts file in removeContact:", err);
     return null;
@@ -56,7 +56,30 @@ const removeContact = async (contactId) => {
   return contacts;
 };
 
-const addContact = async (body) => {};
+const addContact = async (body) => {
+  let contacts;
+  try {
+    contacts = await listContacts();
+  } catch (err) {
+    console.error("Error reading contacts file in addContact:", err);
+    return null;
+  }
+
+  const newContact = {
+    id: uuidv4(),
+    ...body,
+  };
+
+  contacts.push(newContact);
+
+  try {
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return newContact;
+  } catch (err) {
+    console.error("Error writing to contacts file in addContact:", err);
+    return null;
+  }
+};
 
 const updateContact = async (contactId, body) => {};
 
