@@ -13,7 +13,11 @@ const createContact = ({ name, email, phone }) => {
 };
 
 const removeContact = (id) => {
-  return Contact.findByIdAndRemove({ _id: id });
+  return Contact.findByIdAndDelete({ _id: id });
+};
+
+const updateContact = (id, fields) => {
+  return Contact.findByIdAndUpdate(id, fields, { new: true });
 };
 
 module.exports = {
@@ -21,4 +25,5 @@ module.exports = {
   getContactById,
   createContact,
   removeContact,
+  updateContact,
 };

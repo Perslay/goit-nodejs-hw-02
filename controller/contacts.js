@@ -1,10 +1,5 @@
 const service = require("../service");
 
-// const { v4: uuidv4 } = require("uuid");
-// const fs = require("fs").promises;
-// const path = require("path");
-// const contactsPath = path.join(__dirname, "contacts.json");
-
 const get = async (req, res, next) => {
   try {
     const results = await service.getAllContacts();
@@ -19,7 +14,7 @@ const get = async (req, res, next) => {
 };
 
 const getById = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
 
   try {
     const result = await service.getContactById(id);
@@ -41,7 +36,7 @@ const getById = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
 
   try {
     const result = await service.removeContact(id);
@@ -78,7 +73,7 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.contactId;
   const { name, email, phone } = req.body;
 
   try {
