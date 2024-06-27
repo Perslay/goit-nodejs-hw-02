@@ -55,7 +55,7 @@ router.post("/", async (req, res, next) => {
   if (error) {
     res.status(400).json({
       status: 400,
-      message: "missing required name - field",
+      message: error.message,
     });
   } else {
     try {
@@ -98,7 +98,7 @@ router.put("/:contactId", async (req, res, next) => {
   if (error) {
     res.status(400).json({
       status: 400,
-      message: "missing fields",
+      message: error.message,
     });
   } else {
     try {

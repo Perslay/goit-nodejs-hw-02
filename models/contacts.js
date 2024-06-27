@@ -10,6 +10,7 @@ const listContacts = async () => {
     return contacts;
   } catch (err) {
     console.error("Error reading contacts file in listContacts:", err);
+    throw err;
   }
 };
 
@@ -21,7 +22,7 @@ const getContactById = async (contactId) => {
     contacts = JSON.parse(data);
   } catch (err) {
     console.error("Error reading contacts file in getContactById:", err);
-    return null;
+    throw err;
   }
 
   const contact = contacts.filter((contact) => contact.id === contactId);
@@ -38,7 +39,7 @@ const removeContact = async (contactId) => {
     contacts = await listContacts();
   } catch (err) {
     console.error("Error reading contacts file in removeContact:", err);
-    return null;
+    throw err;
   }
 
   const index = contacts.findIndex((contact) => contact.id === contactId);
@@ -52,7 +53,7 @@ const removeContact = async (contactId) => {
     await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   } catch (err) {
     console.error("Error writing to contacts file in removeContact:", err);
-    return null;
+    throw err;
   }
 
   return contacts;
@@ -65,7 +66,7 @@ const addContact = async (body) => {
     contacts = await listContacts();
   } catch (err) {
     console.error("Error reading contacts file in addContact:", err);
-    return null;
+    throw err;
   }
 
   const newContact = {
@@ -80,7 +81,7 @@ const addContact = async (body) => {
     return newContact;
   } catch (err) {
     console.error("Error writing to contacts file in addContact:", err);
-    return null;
+    throw err;
   }
 };
 
@@ -91,7 +92,7 @@ const updateContact = async (contactId, body) => {
     contacts = await listContacts();
   } catch (err) {
     console.error("Error reading contacts file in updateContact:", err);
-    return null;
+    throw err;
   }
 
   const index = contacts.findIndex((contact) => contact.id === contactId);
@@ -111,7 +112,7 @@ const updateContact = async (contactId, body) => {
     return newContact;
   } catch (err) {
     console.error("Error writing to contacts file in updateContact:", err);
-    return null;
+    throw err;
   }
 };
 
