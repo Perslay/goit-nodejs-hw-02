@@ -8,7 +8,7 @@ const get = async (req, res, next) => {
       data: { contacts: results },
     });
   } catch (err) {
-    console.error("Error reading contacts file in listContacts:", err);
+    console.error("Error getting contacts list:", err);
     next(err);
   }
 };
@@ -30,7 +30,7 @@ const getById = async (req, res, next) => {
       });
     }
   } catch (err) {
-    console.error("Error reading contacts file in getContactById:", err);
+    console.error("Error getting contact:", err);
     next(err);
   }
 };
@@ -52,7 +52,7 @@ const remove = async (req, res, next) => {
       });
     }
   } catch (err) {
-    console.error("Error reading contacts file in removeContact:", err);
+    console.error("Error removing contact:", err);
     next(err);
   }
 };
@@ -67,7 +67,7 @@ const create = async (req, res, next) => {
       data: { newContact: result },
     });
   } catch (err) {
-    console.error("Error reading contacts file in addContact:", err);
+    console.error("Error creating contact:", err);
     next(err);
   }
 };
@@ -90,7 +90,30 @@ const update = async (req, res, next) => {
       });
     }
   } catch (err) {
-    console.error("Error reading contacts file in updateContact:", err);
+    console.error("Error updating contact:", err);
+    next(err);
+  }
+};
+
+const updateStatus = async (req, res, next) => {
+  const id = req.params.contactId;
+  const { favorite = false } = req.body;
+
+  try {
+    const result = await service.updateContact(id, { favorite });
+    if (result) {
+      res.json({
+        status: 200,
+        data: { updatedContact: result },
+      });
+    } else {
+      res.status(404).json({
+        status: 404,
+        message: "Not found",
+      });
+    }
+  } catch (err) {
+    console.error("Error updating favorite status in contact:", err);
     next(err);
   }
 };
@@ -101,4 +124,5 @@ module.exports = {
   remove,
   create,
   update,
+  updateStatus,
 };

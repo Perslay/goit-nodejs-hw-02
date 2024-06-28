@@ -17,7 +17,10 @@ const removeContact = (id) => {
 };
 
 const updateContact = (id, fields) => {
-  return Contact.findByIdAndUpdate(id, fields, { new: true });
+  return Contact.findByIdAndUpdate(id, fields, {
+    new: true,
+    runValidators: true,
+  });
 };
 
 module.exports = {
