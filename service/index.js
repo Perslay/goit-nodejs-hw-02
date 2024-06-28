@@ -17,10 +17,11 @@ const removeContact = (id) => {
 };
 
 const updateContact = (id, fields) => {
-  return Contact.findByIdAndUpdate(id, fields, {
-    new: true,
-    runValidators: true,
-  });
+  return Contact.findByIdAndUpdate(
+    { _id: id },
+    { $set: fields },
+    { new: true }
+  );
 };
 
 module.exports = {

@@ -1,4 +1,17 @@
 const service = require("../service");
+const Joi = require("joi");
+
+const schema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    })
+    .required(),
+  phone: Joi.number().integer().positive().required(),
+  favorite: Joi.bool(),
+});
 
 const get = async (req, res, next) => {
   try {
@@ -58,63 +71,84 @@ const remove = async (req, res, next) => {
 };
 
 const create = async (req, res, next) => {
-  const { name, email, phone } = req.body;
+  const { error } = schema.validate(req.body);
 
-  try {
-    const result = await service.createContact({ name, email, phone });
-    res.status(201).json({
-      status: 201,
-      data: { newContact: result },
+  if (error) {
+    res.status(400).json({
+      status: 400,
+      message: error.message,
     });
-  } catch (err) {
-    console.error("Error creating contact:", err);
-    next(err);
+  } else {
+    try {
+      const result = await service.createContact(req.body);
+      res.status(201).json({
+        status: 201,
+        data: { newContact: result },
+      });
+    } catch (err) {
+      console.error("Error creating contact:", err);
+      next(err);
+    }
   }
 };
 
 const update = async (req, res, next) => {
   const id = req.params.contactId;
-  const { name, email, phone } = req.body;
+  const { error } = schema.validate(req.body);
 
-  try {
-    const result = await service.updateContact(id, { name, email, phone });
-    if (result) {
-      res.json({
-        status: 200,
-        data: { newContact: result },
-      });
-    } else {
-      res.status(404).json({
-        status: 404,
-        message: "Not found",
-      });
+  if (error) {
+    res.status(400).json({
+      status: 400,
+      message: error.message,
+    });
+  } else {
+    try {
+      const result = await service.updateContact(id, req.body);
+      if (result) {
+        res.json({
+          status: 200,
+          data: { newContact: result },
+        });
+      } else {
+        res.status(404).json({
+          status: 404,
+          message: "Not found",
+        });
+      }
+    } catch (err) {
+      console.error("Error updating contact:", err);
+      next(err);
     }
-  } catch (err) {
-    console.error("Error updating contact:", err);
-    next(err);
   }
 };
 
 const updateStatus = async (req, res, next) => {
   const id = req.params.contactId;
-  const { favorite = false } = req.body;
+  const { error } = req.body;
 
-  try {
-    const result = await service.updateContact(id, { favorite });
-    if (result) {
-      res.json({
-        status: 200,
-        data: { updatedContact: result },
-      });
-    } else {
-      res.status(404).json({
-        status: 404,
-        message: "Not found",
-      });
+  if (error) {
+    res.status(400).json({
+      status: 400,
+      message: error.message,
+    });
+  } else {
+    try {
+      const result = await service.updateContact(id, req.body);
+      if (result) {
+        res.json({
+          status: 200,
+          data: { updatedContact: result },
+        });
+      } else {
+        res.status(404).json({
+          status: 404,
+          message: "Not found",
+        });
+      }
+    } catch (err) {
+      console.error("Error updating favorite status in contact:", err);
+      next(err);
     }
-  } catch (err) {
-    console.error("Error updating favorite status in contact:", err);
-    next(err);
   }
 };
 
