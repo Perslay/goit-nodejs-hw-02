@@ -9,4 +9,6 @@ router.put("/:contactId", ctrlContact.update);
 router.delete("/:contactId", ctrlContact.remove);
 router.patch("/:contactId/status", ctrlContact.updateStatus);
 
+router.post("/registration", ctrlUser.register);
+
 module.exports = router;
