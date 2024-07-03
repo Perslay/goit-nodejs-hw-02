@@ -25,9 +25,9 @@ const updateContact = (id, fields) => {
   );
 };
 
-// const register = () => {
-//   return User.sth();
-// };
+const registerUser = ({ password, email }) => {
+  return User.create({ password, email });
+};
 
 module.exports = {
   getAllContacts,
@@ -35,5 +35,5 @@ module.exports = {
   createContact,
   removeContact,
   updateContact,
-  // register,
+  registerUser,
 };

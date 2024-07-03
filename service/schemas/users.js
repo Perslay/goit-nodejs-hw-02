@@ -22,14 +22,11 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
 });
 
 userSchema.methods.setPassword = function (password) {
-  this.password = bCrypt.hashSync(password, bCrypt.genSaltSync(6));
+  const salt = bCrypt.genSaltSync(6);
+  this.password = bCrypt.hashSync(password, salt);
 };
 
 userSchema.methods.validPassword = function (password) {

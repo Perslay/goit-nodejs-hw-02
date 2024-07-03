@@ -11,6 +11,7 @@ const schema = Joi.object({
     .required(),
   phone: Joi.number().integer().positive().required(),
   favorite: Joi.bool(),
+  owner: Joi.string().alphanum(),
 });
 
 const get = async (req, res, next) => {
