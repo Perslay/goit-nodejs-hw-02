@@ -27,13 +27,13 @@ const schema = Joi.object({
 
 const register = async (req, res, next) => {
   const { error } = schema.validate(req.body);
-  const user = await User.findOne({ email });
+  const user = await User.findOne(req.body.email);
 
   if (error) {
     return res.status(400).json({
       status: "400 Bad Request",
       contentType: "application/json",
-      responseBody: "<Błąd z Joi lub innej biblioteki walidacji>",
+      responseBody: error.message,
     });
   }
 
@@ -48,7 +48,7 @@ const register = async (req, res, next) => {
   }
 
   try {
-    const result = await service.registerUser({ password, email });
+    const result = await service.registerUser(req.body);
 
     if (result) {
       const newUser = new User({ password, email });
@@ -60,7 +60,50 @@ const register = async (req, res, next) => {
         contentType: "application/json",
         responseBody: {
           user: {
-            email: email,
+            email: req.body.email,
+            subscription: "starter",
+          },
+        },
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+const login = async (req, res, next) => {
+  const { error } = schema.validate(req.body);
+  const user = await User.findOne(req.body.email);
+
+  if (error) {
+    return res.status(400).json({
+      status: "400 Bad Request",
+      contentType: "application/json",
+      responseBody: error.message,
+    });
+  }
+
+  if (!user || !user.validPassword(password)) {
+    return res.status(400).json({
+      status: "401 Unauthorized",
+      responseBody: {
+        message: "Email or password is wrong",
+      },
+    });
+  }
+
+  try {
+    const data = await service.logUserIn(req.body, user); // { password, email }
+
+    if (data.result) {
+      res.json({
+        status: "200 OK",
+        contentType: "application/json",
+        responseBody: {
+          token: data.token,
+          user: {
+            email: req.body.email,
             subscription: "starter",
           },
         },
@@ -74,4 +117,5 @@ const register = async (req, res, next) => {
 
 module.exports = {
   register,
+  login,
 };

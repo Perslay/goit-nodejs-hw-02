@@ -29,6 +29,27 @@ const registerUser = ({ password, email }) => {
   return User.create({ password, email });
 };
 
+const logUserIn = ({ email }, user) => {
+  const payload = {
+    id: user.id,
+    username: user.username,
+  };
+
+  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+
+  const filter = { email: email };
+  const update = { token: token };
+  const result = User.findOneAndUpdate(filter, update, {
+    new: true,
+  });
+
+  const data = {
+    result: result,
+    token: token,
+  };
+  return data;
+};
+
 module.exports = {
   getAllContacts,
   getContactById,
@@ -36,4 +57,5 @@ module.exports = {
   removeContact,
   updateContact,
   registerUser,
+  logUserIn,
 };
