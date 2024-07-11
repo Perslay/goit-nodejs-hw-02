@@ -24,13 +24,12 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.methods.setPassword = function (password) {
-  const salt = bCrypt.genSaltSync(6);
-  this.password = bCrypt.hashSync(password, salt);
+userSchema.methods.setPassword = async function (password) {
+  this.password = await bCrypt.hash(password, 10);
 };
 
-userSchema.methods.validPassword = function (password) {
-  return bCrypt.compareSync(password, this.password);
+userSchema.methods.validatePassword = async function (password) {
+  return await bCrypt.compare(password, this.password);
 };
 
 const User = mongoose.model("user", userSchema);
