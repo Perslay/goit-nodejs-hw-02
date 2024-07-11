@@ -1,7 +1,6 @@
-const service = require("../service");
+// const service = require("../service");
 const User = require("../service/schemas/user");
 const Joi = require("joi");
-// const token = require("../passport");
 const passport = require("../passport");
 const jwt = require("jsonwebtoken");
 
@@ -12,15 +11,6 @@ const schema = Joi.object({
       minDomainSegments: 2,
       tlds: { allow: ["com", "net"] },
     })
-    // UNIQUE EMAIL
-    // .external(async (email) => {
-    //   // You have to create `checkEmailInUse` funciton somewhere in your code and call it here
-    //   const isEmailInUse = await checkEmailInUse(email);
-    //   if (isEmailInUse) {
-    //     throw new Error("email in use");
-    //   }
-    //   return email;
-    // })
     .required(),
   subscription: Joi.string()
     .valid("starter", "pro", "business")
@@ -29,13 +19,22 @@ const schema = Joi.object({
 });
 
 const auth = (req, res, next) => {
-  passport.authenticate;
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (!user || err) {
+      return res.status(401).json({
+        status: "401 Unauthorized",
+        contentType: "application/json",
+        responseBody: { message: "Not authorized" },
+      });
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
 };
 
 const register = async (req, res, next) => {
   const { error } = schema.validate(req.body);
   const user = await User.findOne({ email: req.body.email });
-  // const user = await User.findOne({ email }, { _id });
 
   if (error) {
     return res.status(400).json({
@@ -60,7 +59,6 @@ const register = async (req, res, next) => {
 
     // if (result) {
     const newUser = new User({
-      // password: req.body.password,
       email: req.body.email,
     });
     await newUser.setPassword(req.body.password);
@@ -85,9 +83,6 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { error } = schema.validate(req.body);
-  // const user = await User.findOne({ email }, { _id });
-  // console.log('Email:', req.body.email);
-  // console.log('Email:', {email});
 
   if (error) {
     return res.status(400).json({
@@ -98,7 +93,6 @@ const login = async (req, res, next) => {
   }
 
   const user = await User.findOne({ email: req.body.email });
-  // console.log("user:", user);
 
   if (!user) {
     return res.status(401).json({
@@ -144,15 +138,15 @@ const login = async (req, res, next) => {
     });
     // }
 
-    res.status(500).json({
-      status: "500 Internal Server Error",
-      responseBody: {
-        token: token,
-        responseBody: {
-          message: "Failed to log user in",
-        },
-      },
-    });
+    // res.status(500).json({
+    //   status: "500 Internal Server Error",
+    //   responseBody: {
+    //     token: token,
+    //     responseBody: {
+    //       message: "Failed to log user in",
+    //     },
+    //   },
+    // });
   } catch (err) {
     console.log(err);
     next(err);
