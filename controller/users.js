@@ -1,7 +1,6 @@
-// const service = require("../service");
 const User = require("../service/schemas/user");
 const Joi = require("joi");
-const passport = require("../passport");
+const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
 const schema = Joi.object({
@@ -19,14 +18,32 @@ const schema = Joi.object({
 });
 
 const auth = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, user) => {
-    if (!user || err) {
+  passport.authenticate("jwt", { session: false }, (err, user, info) => {
+    // if (!user || err) {
+    //   return res.status(401).json({
+    //     status: "401 Unauthorized",
+    //     contentType: "application/json",
+    //     responseBody: { message: "Not authorized" },
+    //   });
+    // }
+    if (err) {
+      console.error("Authentication error:", err);
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
         responseBody: { message: "Not authorized" },
       });
     }
+
+    if (!user) {
+      console.error("User not found or invalid token:", info);
+      return res.status(401).json({
+        status: "401 Unauthorized",
+        contentType: "application/json",
+        responseBody: { message: "Not authorized" },
+      });
+    }
+
     req.user = user;
     next();
   })(req, res, next);
@@ -55,9 +72,6 @@ const register = async (req, res, next) => {
   }
 
   try {
-    // const result = await service.registerUser(req.body);
-
-    // if (result) {
     const newUser = new User({
       email: req.body.email,
     });
@@ -74,7 +88,6 @@ const register = async (req, res, next) => {
         },
       },
     });
-    // }
   } catch (err) {
     console.log(err);
     next(err);
@@ -122,9 +135,6 @@ const login = async (req, res, next) => {
     const secret = process.env.AUTH_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "12h" });
 
-    // const data = await service.logUserIn(req.body, token);
-
-    // if (data.result) {
     return res.json({
       status: "200 OK",
       contentType: "application/json",
@@ -136,19 +146,34 @@ const login = async (req, res, next) => {
         },
       },
     });
-    // }
-
-    // res.status(500).json({
-    //   status: "500 Internal Server Error",
-    //   responseBody: {
-    //     token: token,
-    //     responseBody: {
-    //       message: "Failed to log user in",
-    //     },
-    //   },
-    // });
   } catch (err) {
     console.log(err);
+    next(err);
+  }
+};
+
+const logout = async (req, res, next) => {
+  // check token
+  // find user by _id
+  // if no user return res.json(401)
+  // if user exists delete user token and return success status 204 message
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.json({
+        status: "401 Unauthorized",
+        responseBody: { message: ":o" },
+      });
+    }
+
+    user.token = null;
+    await user.save();
+
+    return res.status(204).json({
+      status: "204 No Content",
+    });
+  } catch (err) {
     next(err);
   }
 };
@@ -156,4 +181,6 @@ const login = async (req, res, next) => {
 module.exports = {
   register,
   login,
+  logout,
+  auth,
 };

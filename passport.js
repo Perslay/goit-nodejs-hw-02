@@ -13,8 +13,8 @@ const params = {
 
 passport.use(
   new Strategy(params, function (payload, done) {
-    User.find({ _id: payload.id })
-      .then(([user]) => {
+    User.findById(payload.id)
+      .then((user) => {
         if (!user) {
           return done(new Error("User not found"));
         }
@@ -24,13 +24,4 @@ passport.use(
   })
 );
 
-// const jwt = require("jsonwebtoken");
-
-// const payload = {
-//   id: user.id, // user is not defined
-//   username: user.username,
-// };
-// const secret = process.env.AUTH_SECRET;
-// const token = jwt.sign(payload, secret, { expiresIn: "12h" });
-
-// module.export = token;
+module.exports = passport;

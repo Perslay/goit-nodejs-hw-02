@@ -26,24 +26,10 @@ const updateContact = (id, fields) => {
   );
 };
 
-// const registerUser = ({ password, email }) => {
-//   return User.create({ password, email });
-// };
-
-// const logUserIn = ({ email }, token) => {
-//   const filter = { email: email };
-//   const update = { token: token };
-//   return User.findOneAndUpdate(filter, update, {
-//     new: true,
-//   });
-// };
-
 module.exports = {
   getAllContacts,
   getContactById,
   createContact,
   removeContact,
   updateContact,
-  // registerUser,
-  // logUserIn,
 };
