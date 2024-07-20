@@ -16,7 +16,6 @@ const schema = Joi.object({
 
 const get = async (req, res, next) => {
   try {
-    console.log("req.query:", req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
 
@@ -35,7 +34,6 @@ const get = async (req, res, next) => {
       },
     });
   } catch (err) {
-    console.error("Error getting contacts list:", err);
     next(err);
   }
 };
@@ -57,7 +55,6 @@ const getById = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error getting contact:", err);
     next(err);
   }
 };
@@ -79,7 +76,6 @@ const remove = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error removing contact:", err);
     next(err);
   }
 };
@@ -101,7 +97,6 @@ const create = async (req, res, next) => {
       data: { newContact: result },
     });
   } catch (err) {
-    console.error("Error creating contact:", err);
     next(err);
   }
 };
@@ -131,7 +126,6 @@ const update = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error updating contact:", err);
     next(err);
   }
 };
@@ -161,7 +155,6 @@ const updateStatus = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error updating favorite status in contact:", err);
     next(err);
   }
 };

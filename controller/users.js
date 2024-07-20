@@ -18,18 +18,8 @@ const schema = Joi.object({
 });
 
 const auth = (req, res, next) => {
-  // console.log("Received request to:", req.url);
-  // console.log("Authorization Header:", req.headers.authorization);
-  passport.authenticate("jwt", { session: false }, (err, user, info) => {
-    // if (!user || err) {
-    //   return res.status(401).json({
-    //     status: "401 Unauthorized",
-    //     contentType: "application/json",
-    //     responseBody: { message: "Not authorized" },
-    //   });
-    // }
-    if (err) {
-      // console.error("Authentication error:", err);
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    if (!user || err) {
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
@@ -37,16 +27,6 @@ const auth = (req, res, next) => {
       });
     }
 
-    if (!user) {
-      // console.error("User not found or invalid token:", info);
-      return res.status(401).json({
-        status: "401 Unauthorized",
-        contentType: "application/json",
-        responseBody: { message: "Not authorized" },
-      });
-    }
-
-    // console.log("Authenticated user:", user);
     req.user = user;
     next();
   })(req, res, next);
@@ -87,12 +67,11 @@ const register = async (req, res, next) => {
       responseBody: {
         user: {
           email: req.body.email,
-          subscription: "starter",
+          subscription: user.subscription,
         },
       },
     });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
@@ -146,27 +125,20 @@ const login = async (req, res, next) => {
         token: token,
         user: {
           email: req.body.email,
-          subscription: "starter",
+          subscription: user.subscription,
         },
       },
     });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
 
 const logout = async (req, res, next) => {
   try {
-    console.log(req.user);
-
-    // console.log("Logout request for user:", req.user);
-
     const userId = req.user._id;
     const user = await User.findById(userId);
     if (!user) {
-      // console.error("User not found during logout:", userId);
-
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
@@ -176,18 +148,15 @@ const logout = async (req, res, next) => {
 
     user.token = null;
     await user.save();
-    // console.log("User token removed and saved:", userId);
 
     return res.status(204).send();
   } catch (err) {
-    // console.error("Error during logout:", err);
     next(err);
   }
 };
 
 const current = async (req, res, next) => {
   try {
-    console.log(req.user);
     const userId = req.user._id;
     const user = await User.findById(userId);
 
@@ -206,7 +175,50 @@ const current = async (req, res, next) => {
       contentType: "application / json",
       responseBody: {
         email: user.email,
-        subscription: "starter",
+        subscription: user.subscription,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateSub = async (req, res, next) => {
+  const userId = req.user._id;
+  const { error } = req.body;
+
+  if (error || !req.body.subscription) {
+    return res.status(400).json({
+      status: "400 Bad Request",
+      contentType: "application/json",
+      responseBody: {
+        message: "Invalid subscription type",
+      },
+    });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({
+        status: "401 Unauthorized",
+        contentType: "application / json",
+        responseBody: {
+          message: "Not authorized",
+        },
+      });
+    }
+
+    user.subscription = req.body.subscription;
+    await user.save();
+
+    res.json({
+      status: "200 OK",
+      contentType: "application / json",
+      responseBody: {
+        email: user.email,
+        subscription: user.subscription,
       },
     });
   } catch (err) {
@@ -220,4 +232,5 @@ module.exports = {
   logout,
   auth,
   current,
+  updateSub,
 };

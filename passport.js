@@ -13,18 +13,14 @@ const params = {
 
 passport.use(
   new Strategy(params, function (payload, done) {
-    // console.log("JWT payload:", payload);
     User.findById(payload.id)
       .then((user) => {
         if (!user) {
-          // console.error("User not found:", payload.id);
           return done(null, false, { message: "User not found" });
         }
-        // console.log("User found:", user);
         return done(null, user);
       })
       .catch((err) => {
-        // console.error("Error finding user:", err);
         return done(err, false);
       });
   })
