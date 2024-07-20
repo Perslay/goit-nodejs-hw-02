@@ -16,10 +16,16 @@ const schema = Joi.object({
 
 const get = async (req, res, next) => {
   try {
-    const results = await service.getAllContacts();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const results = await service.getAllContacts(page, limit);
     res.json({
       status: 200,
       data: { contacts: results },
+      pagination: {
+        page,
+        limit,
+      },
     });
   } catch (err) {
     console.error("Error getting contacts list:", err);
