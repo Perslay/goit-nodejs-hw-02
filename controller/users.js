@@ -18,6 +18,8 @@ const schema = Joi.object({
 });
 
 const auth = (req, res, next) => {
+  // console.log("Received request to:", req.url);
+  // console.log("Authorization Header:", req.headers.authorization);
   passport.authenticate("jwt", { session: false }, (err, user, info) => {
     // if (!user || err) {
     //   return res.status(401).json({
@@ -27,7 +29,7 @@ const auth = (req, res, next) => {
     //   });
     // }
     if (err) {
-      console.error("Authentication error:", err);
+      // console.error("Authentication error:", err);
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
@@ -36,7 +38,7 @@ const auth = (req, res, next) => {
     }
 
     if (!user) {
-      console.error("User not found or invalid token:", info);
+      // console.error("User not found or invalid token:", info);
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
@@ -44,6 +46,7 @@ const auth = (req, res, next) => {
       });
     }
 
+    // console.log("Authenticated user:", user);
     req.user = user;
     next();
   })(req, res, next);
@@ -132,6 +135,7 @@ const login = async (req, res, next) => {
       id: user._id,
       username: user.username,
     };
+    const accessToken = jwt;
     const secret = process.env.AUTH_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "12h" });
 
@@ -153,27 +157,28 @@ const login = async (req, res, next) => {
 };
 
 const logout = async (req, res, next) => {
-  // check token
-  // find user by _id
-  // if no user return res.json(401)
-  // if user exists delete user token and return success status 204 message
   try {
+    // console.log("Logout request for user:", req.user);
+
     const userId = req.user._id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.json({
+      // console.error("User not found during logout:", userId);
+
+      return res.status(401).json({
         status: "401 Unauthorized",
-        responseBody: { message: ":o" },
+        contentType: "application/json",
+        responseBody: { message: "User not found" },
       });
     }
 
     user.token = null;
     await user.save();
+    // console.log("User token removed and saved:", userId);
 
-    return res.status(204).json({
-      status: "204 No Content",
-    });
+    return res.status(204).send();
   } catch (err) {
+    // console.error("Error during logout:", err);
     next(err);
   }
 };

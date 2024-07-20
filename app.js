@@ -1,7 +1,7 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-const passport = require("./passport");
+require("./passport");
 require("dotenv").config();
 
 const apiRouter = require("./routes/api/index");
