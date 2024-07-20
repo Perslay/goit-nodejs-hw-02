@@ -158,6 +158,8 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
+    console.log(req.user);
+
     // console.log("Logout request for user:", req.user);
 
     const userId = req.user._id;
@@ -183,9 +185,39 @@ const logout = async (req, res, next) => {
   }
 };
 
+const current = async (req, res, next) => {
+  try {
+    console.log(req.user);
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({
+        status: "401 Unauthorized",
+        contentType: "application / json",
+        responseBody: {
+          message: "Not authorized",
+        },
+      });
+    }
+
+    res.json({
+      status: "200 OK",
+      contentType: "application / json",
+      responseBody: {
+        email: user.email,
+        subscription: "starter",
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   auth,
+  current,
 };
