@@ -16,9 +16,16 @@ const schema = Joi.object({
 
 const get = async (req, res, next) => {
   try {
+    console.log("req.query:", req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const results = await service.getAllContacts(page, limit);
+
+    const filter = {};
+    if (req.query.favorite) {
+      filter.favorite = req.query.favorite === "true";
+    }
+
+    const results = await service.getAllContacts(page, limit, filter);
     res.json({
       status: 200,
       data: { contacts: results },
