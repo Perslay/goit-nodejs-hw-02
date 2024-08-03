@@ -114,7 +114,6 @@ const login = async (req, res, next) => {
       id: user._id,
       username: user.username,
     };
-    const accessToken = jwt;
     const secret = process.env.AUTH_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "12h" });
 
@@ -138,13 +137,6 @@ const logout = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(401).json({
-        status: "401 Unauthorized",
-        contentType: "application/json",
-        responseBody: { message: "User not found" },
-      });
-    }
 
     user.token = null;
     await user.save();
@@ -163,7 +155,7 @@ const current = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         status: "401 Unauthorized",
-        contentType: "application / json",
+        contentType: "application/json",
         responseBody: {
           message: "Not authorized",
         },
@@ -172,10 +164,10 @@ const current = async (req, res, next) => {
 
     res.json({
       status: "200 OK",
-      contentType: "application / json",
+      contentType: "application/json",
       responseBody: {
-        email: user.email,
-        subscription: user.subscription,
+        email: req.user.email,
+        subscription: req.user.subscription,
       },
     });
   } catch (err) {
@@ -203,7 +195,7 @@ const updateSub = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         status: "401 Unauthorized",
-        contentType: "application / json",
+        contentType: "application/json",
         responseBody: {
           message: "Not authorized",
         },
@@ -215,7 +207,7 @@ const updateSub = async (req, res, next) => {
 
     res.json({
       status: "200 OK",
-      contentType: "application / json",
+      contentType: "application/json",
       responseBody: {
         email: user.email,
         subscription: user.subscription,
