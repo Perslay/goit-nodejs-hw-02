@@ -11,7 +11,7 @@ const schema = Joi.object({
     .required(),
   phone: Joi.number().integer().positive().required(),
   favorite: Joi.bool(),
-  owner: Joi.string().alphanum(),
+  owner: Joi.string().alphanum().required(),
 });
 
 const get = async (req, res, next) => {
@@ -20,6 +20,7 @@ const get = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 20;
 
     const filter = {};
+    filter.owner = req.user._id;
     if (req.query.favorite) {
       filter.favorite = req.query.favorite === "true";
     }
@@ -91,7 +92,8 @@ const create = async (req, res, next) => {
   }
 
   try {
-    const result = await service.createContact(req.body);
+    const userId = req.user._id;
+    const result = await service.createContact(req.body, userId);
     res.status(201).json({
       status: 201,
       data: { newContact: result },

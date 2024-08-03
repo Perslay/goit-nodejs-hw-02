@@ -1,6 +1,4 @@
-// const token = require("../passport");
 const Contact = require("./schemas/contact");
-// const User = require("./schemas/user");
 
 const getAllContacts = async (page = 1, limit = 20, filter = {}) => {
   const skip = (page - 1) * limit;
@@ -11,8 +9,8 @@ const getContactById = (id) => {
   return Contact.findOne({ _id: id });
 };
 
-const createContact = ({ name, email, phone }) => {
-  return Contact.create({ name, email, phone });
+const createContact = ({ name, email, phone }, userId) => {
+  return Contact.create({ name, email, phone, owner: userId });
 };
 
 const removeContact = (id) => {
