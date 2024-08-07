@@ -117,8 +117,6 @@ const login = async (req, res, next) => {
     };
     const secret = process.env.AUTH_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "12h" });
-    console.log(token);
-    console.log(user._id);
 
     return res.json({
       status: "200 OK",
@@ -154,7 +152,6 @@ const current = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId);
-    console.log(user);
 
     if (!user || !user.token) {
       return res.status(401).json({
