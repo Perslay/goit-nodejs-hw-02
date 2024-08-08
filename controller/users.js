@@ -118,6 +118,9 @@ const login = async (req, res, next) => {
     const secret = process.env.AUTH_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "12h" });
 
+    user.token = token;
+    await user.save();
+
     return res.json({
       status: "200 OK",
       contentType: "application/json",
