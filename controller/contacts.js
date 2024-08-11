@@ -11,17 +11,30 @@ const schema = Joi.object({
     .required(),
   phone: Joi.number().integer().positive().required(),
   favorite: Joi.bool(),
+  owner: Joi.string().alphanum().required(),
 });
 
 const get = async (req, res, next) => {
   try {
-    const results = await service.getAllContacts();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const filter = {};
+    filter.owner = req.user._id;
+    if (req.query.favorite) {
+      filter.favorite = req.query.favorite === "true";
+    }
+
+    const results = await service.getAllContacts(page, limit, filter);
     res.json({
       status: 200,
       data: { contacts: results },
+      pagination: {
+        page,
+        limit,
+      },
     });
   } catch (err) {
-    console.error("Error getting contacts list:", err);
     next(err);
   }
 };
@@ -43,7 +56,6 @@ const getById = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error getting contact:", err);
     next(err);
   }
 };
@@ -65,7 +77,6 @@ const remove = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error removing contact:", err);
     next(err);
   }
 };
@@ -81,13 +92,13 @@ const create = async (req, res, next) => {
   }
 
   try {
-    const result = await service.createContact(req.body);
+    const userId = req.user._id;
+    const result = await service.createContact(req.body, userId);
     res.status(201).json({
       status: 201,
       data: { newContact: result },
     });
   } catch (err) {
-    console.error("Error creating contact:", err);
     next(err);
   }
 };
@@ -117,7 +128,6 @@ const update = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error updating contact:", err);
     next(err);
   }
 };
@@ -147,7 +157,6 @@ const updateStatus = async (req, res, next) => {
       message: "Not found",
     });
   } catch (err) {
-    console.error("Error updating favorite status in contact:", err);
     next(err);
   }
 };
