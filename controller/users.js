@@ -2,6 +2,7 @@ const User = require("../service/schemas/user");
 const Joi = require("joi");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 
 const schema = Joi.object({
   password: Joi.string().required(),
@@ -15,6 +16,7 @@ const schema = Joi.object({
     .valid("starter", "pro", "business")
     .default("starter"),
   token: Joi.string().default(null),
+  avatarURL: Joi.string(),
 });
 
 const auth = (req, res, next) => {
@@ -55,9 +57,12 @@ const register = async (req, res, next) => {
   }
 
   try {
+    const url = gravatar.url(req.body.email, { s: "250", r: "pg", d: "404" });
+
     const newUser = new User({
       email: req.body.email,
       subscription: "starter",
+      avatarURL: url,
     });
     await newUser.setPassword(req.body.password);
     await newUser.save();
@@ -69,6 +74,7 @@ const register = async (req, res, next) => {
         user: {
           email: req.body.email,
           subscription: "starter",
+          avatarURL: url, // usunac pozniej
         },
       },
     });
@@ -222,6 +228,48 @@ const updateSub = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  const userId = req.user._id;
+  const { error } = req.body;
+
+  if (error || !req.body.avatarURL) {
+    return res.status(400).json({
+      status: "400 Bad Request",
+      contentType: "application/json",
+      responseBody: {
+        message: "Invalid avatar.",
+      },
+    });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({
+        status: "401 Unauthorized",
+        contentType: "application/json",
+        responseBody: {
+          message: "Not authorized",
+        },
+      });
+    }
+
+    user.avatarURL = req.body.avatarURL;
+    await user.save();
+
+    res.json({
+      status: "200 OK",
+      contentType: "multipart/form-data",
+      requestBody: {
+        avatarURL: user.avatarURL,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -229,4 +277,5 @@ module.exports = {
   auth,
   current,
   updateSub,
+  updateAvatar,
 };

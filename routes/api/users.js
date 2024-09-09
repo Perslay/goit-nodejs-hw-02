@@ -7,5 +7,6 @@ router.post("/login", ctrlUser.login);
 router.get("/logout", ctrlUser.auth, ctrlUser.logout);
 router.get("/current", ctrlUser.auth, ctrlUser.current);
 router.patch("/", ctrlUser.updateSub);
+router.patch("/avatars", ctrlUser.updateAvatar);
 
 module.exports = router;
