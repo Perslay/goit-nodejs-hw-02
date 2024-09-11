@@ -3,6 +3,7 @@ const Joi = require("joi");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
+const { Jimp } = require("jimp");
 
 const schema = Joi.object({
   password: Joi.string().required(),
@@ -162,7 +163,7 @@ const current = async (req, res, next) => {
     const userId = req.user._id;
     const user = await User.findById(userId);
 
-    if (!user || !user.token) {
+    if (!user) {
       return res.status(401).json({
         status: "401 Unauthorized",
         contentType: "application/json",
@@ -186,7 +187,6 @@ const current = async (req, res, next) => {
 };
 
 const updateSub = async (req, res, next) => {
-  const userId = req.user._id;
   const { error } = req.body;
 
   if (error || !req.body.subscription) {
@@ -200,6 +200,7 @@ const updateSub = async (req, res, next) => {
   }
 
   try {
+    const userId = req.user._id;
     const user = await User.findById(userId);
 
     if (!user) {
@@ -256,6 +257,10 @@ const updateAvatar = async (req, res, next) => {
     }
 
     user.avatarURL = req.body.avatarURL;
+    // // open a file called "lenna.png"
+    // const image = await Jimp.read("test.png");
+    // image.resize(250, 250); // resize
+    // await image.write("test-small.jpg"); // save
     await user.save();
 
     res.json({
