@@ -10,7 +10,7 @@ const {
   tempDir,
   storeImage,
 } = require("./middlewares/upload");
-const apiRouter = require("./routes/api/index");
+const apiRouter = require("./routes/api/index-routes");
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";

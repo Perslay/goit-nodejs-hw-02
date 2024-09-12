@@ -1,9 +1,11 @@
-const User = require("../service/schemas/user");
+const User = require("../service/schemas/user-schema");
+const path = require("path");
+const fs = require("fs");
 const Joi = require("joi");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
-const { Jimp } = require("jimp");
+const Jimp = require("jimp");
 
 const schema = Joi.object({
   password: Joi.string().required(),
@@ -244,6 +246,19 @@ const updateAvatar = async (req, res, next) => {
   }
 
   try {
+    const avatarPath = req.file.path;
+    console.log("avatarPath", avatarPath);
+    const image = await Jimp.read(avatarPath);
+
+    image.resize(250, 250);
+    const uniqueFilename = `${userId}-${Date.now()}.jpg`;
+    const avatarsDir = path.join(__dirname, "..", "public", "avatars");
+    const newAvatarPath = path.join(avatarsDir, uniqueFilename);
+
+    await fs.mkdir(avatarsDir, { recursive: true });
+    await image.writeAsync(newAvatarPath);
+    await fs.unlink(avatarPath);
+
     const user = await User.findById(userId);
 
     if (!user) {
@@ -256,11 +271,7 @@ const updateAvatar = async (req, res, next) => {
       });
     }
 
-    user.avatarURL = req.file.path;
-    // // open a file called "lenna.png"
-    // const image = await Jimp.read("test.png");
-    // image.resize(250, 250); // resize
-    // await image.write("test-small.jpg"); // save
+    user.avatarURL = `/avatars/${uniqueFilename}`;
     await user.save();
 
     res.json({
