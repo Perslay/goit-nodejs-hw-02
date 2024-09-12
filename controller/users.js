@@ -231,9 +231,9 @@ const updateSub = async (req, res, next) => {
 
 const updateAvatar = async (req, res, next) => {
   const userId = req.user._id;
-  const { error } = req.body;
+  const { error } = req.file;
 
-  if (error || !req.body.avatarURL) {
+  if (error || !req.file) {
     return res.status(400).json({
       status: "400 Bad Request",
       contentType: "application/json",
@@ -256,7 +256,7 @@ const updateAvatar = async (req, res, next) => {
       });
     }
 
-    user.avatarURL = req.body.avatarURL;
+    user.avatarURL = req.file.path;
     // // open a file called "lenna.png"
     // const image = await Jimp.read("test.png");
     // image.resize(250, 250); // resize
@@ -265,7 +265,7 @@ const updateAvatar = async (req, res, next) => {
 
     res.json({
       status: "200 OK",
-      contentType: "multipart/form-data",
+      contentType: "application/json",
       requestBody: {
         avatarURL: user.avatarURL,
       },

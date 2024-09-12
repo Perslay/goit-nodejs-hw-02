@@ -1,17 +1,3 @@
-// const express = require("express");
-// const logger = require("morgan");
-// const cors = require("cors");
-// const createError = require("http-errors");
-// const path = require("path");
-// const fs = require("fs").promises;
-// const multer = require("multer");
-// const tempDir = path.join(process.cwd(), "tmp");
-// const storeImage = path.join(process.cwd(), "public/avatars");
-// require("./passport");
-// require("dotenv").config();
-// const apiRouter = require("./routes/api/index");
-// const app = express();
-
 const mongoose = require("mongoose");
 const app = require("./app");
 
@@ -24,8 +10,8 @@ connection
   .then(() => {
     app.app.listen(MAIN_PORT, async function () {
       try {
-        app.createFolderIsNotExist(app.tempDir);
-        app.createFolderIsNotExist(app.storeImage);
+        app.createFolderIfNotExist(app.tempDir);
+        app.createFolderIfNotExist(app.storeImage);
         console.log("Folders checked/created successfully");
       } catch (err) {
         console.error("Error creating folders", err.message);
