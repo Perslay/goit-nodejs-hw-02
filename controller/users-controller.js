@@ -77,7 +77,6 @@ const register = async (req, res, next) => {
         user: {
           email: req.body.email,
           subscription: "starter",
-          avatarURL: url, // usunac pozniej
         },
       },
     });
@@ -234,20 +233,19 @@ const updateSub = async (req, res, next) => {
 const updateAvatar = async (req, res, next) => {
   const userId = req.user._id;
   const { error } = req.file;
+  const avatarPath = req.file.path;
 
   if (error || !req.file) {
     return res.status(400).json({
       status: "400 Bad Request",
       contentType: "application/json",
       responseBody: {
-        message: "Invalid avatar.",
+        message: "Invalid avatar file.",
       },
     });
   }
 
   try {
-    const avatarPath = req.file.path;
-    console.log("avatarPath", avatarPath);
     const image = await Jimp.read(avatarPath);
 
     image.resize(250, 250);
@@ -255,9 +253,9 @@ const updateAvatar = async (req, res, next) => {
     const avatarsDir = path.join(__dirname, "..", "public", "avatars");
     const newAvatarPath = path.join(avatarsDir, uniqueFilename);
 
-    await fs.mkdir(avatarsDir, { recursive: true });
+    await fs.promises.mkdir(avatarsDir, { recursive: true });
     await image.writeAsync(newAvatarPath);
-    await fs.unlink(avatarPath);
+    await fs.promises.unlink(avatarPath);
 
     const user = await User.findById(userId);
 
