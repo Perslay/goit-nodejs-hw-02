@@ -25,10 +25,15 @@ const updateContact = (id, fields) => {
   );
 };
 
+const getUserByVerToken = (verificationToken) => {
+  return User.findOne({ verificationToken: verificationToken });
+};
+
 module.exports = {
   getAllContacts,
   getContactById,
   createContact,
   removeContact,
   updateContact,
+  getUserByVerToken,
 };

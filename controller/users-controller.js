@@ -6,6 +6,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
 const Jimp = require("jimp");
+const service = require("../service");
 
 const schema = Joi.object({
   password: Joi.string().required(),
@@ -20,6 +21,8 @@ const schema = Joi.object({
     .default("starter"),
   token: Joi.string().default(null),
   avatarURL: Joi.string(),
+  verify: Joi.boolean().default(false),
+  verificationToken: Joi.string().required(),
 });
 
 const auth = (req, res, next) => {
@@ -284,6 +287,48 @@ const updateAvatar = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  const verificationToken = req.params.verificationToken;
+  const { error } = req.body;
+
+  if (error) {
+    return res.status(400).json({
+      status: "400 Bad Request",
+      contentType: "application/json",
+      responseBody: {
+        message: error.message,
+      },
+    });
+  }
+
+  try {
+    const user = await service.getUserByVerToken(verificationToken);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "404 Not Found",
+        contentType: "application/json",
+        responseBody: {
+          message: "User not found",
+        },
+      });
+    }
+
+    user.verificationToken = null;
+    user.verify = true;
+
+    res.json({
+      status: "200 OK",
+      contentType: "application/json",
+      responseBody: {
+        message: "Verification successful",
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -292,4 +337,5 @@ module.exports = {
   current,
   updateSub,
   updateAvatar,
+  verifyEmail,
 };

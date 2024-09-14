@@ -7,6 +7,7 @@ router.post("/signup", ctrlUser.register);
 router.post("/login", ctrlUser.login);
 router.get("/logout", ctrlUser.auth, ctrlUser.logout);
 router.get("/current", ctrlUser.auth, ctrlUser.current);
+router.get("/verify/:verificationToken", ctrlUser.verifyEmail);
 router.patch("/", ctrlUser.auth, ctrlUser.updateSub);
 router.patch(
   "/avatars",
