@@ -8,7 +8,14 @@ const connection = mongoose.connect(uriDb);
 
 connection
   .then(() => {
-    app.listen(MAIN_PORT, function () {
+    app.app.listen(MAIN_PORT, async function () {
+      try {
+        app.createFolderIfNotExist(app.tempDir);
+        app.createFolderIfNotExist(app.storeImage);
+        console.log("Folders checked/created successfully");
+      } catch (err) {
+        console.error("Error creating folders", err.message);
+      }
       console.log("Database connection successful");
     });
   })

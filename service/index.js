@@ -1,4 +1,4 @@
-const Contact = require("./schemas/contact");
+const Contact = require("./schemas/contact-schema");
 
 const getAllContacts = async (page = 1, limit = 20, filter = {}) => {
   const skip = (page - 1) * limit;
