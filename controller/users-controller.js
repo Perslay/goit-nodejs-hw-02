@@ -7,6 +7,19 @@ const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
 const Jimp = require("jimp");
 const service = require("../service");
+const { v4: uuidv4 } = require("uuid");
+const sgMail = require("@sendgrid/mail");
+const nodemailer = require("nodemailer");
+
+sgMail.setApiKey(process.env.API_KEY);
+
+const transporter = nodemailer.createTransport({
+  service: "SendGrid",
+  auth: {
+    user: "apikey",
+    pass: process.env.API_KEY,
+  },
+});
 
 const schema = Joi.object({
   password: Joi.string().required(),
@@ -64,14 +77,26 @@ const register = async (req, res, next) => {
 
   try {
     const url = gravatar.url(req.body.email, { s: "250", r: "pg", d: "404" });
+    const newToken = uuidv4();
 
     const newUser = new User({
       email: req.body.email,
       subscription: "starter",
       avatarURL: url,
+      verificationToken: newToken,
     });
     await newUser.setPassword(req.body.password);
     await newUser.save();
+
+    const mailOptions = {
+      from: "natalia.44.fedyk@gmail.com",
+      // to: newUser.email,
+      to: "natalia.44.fedyk@gmail.com",
+      subject: "Email Verification",
+      html: `<p>Please verify your email by clicking on the following link: <a href="http://your-domain.com/verify/${newToken}">Verify Email</a></p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     res.status(201).json({
       status: "201 Created",
