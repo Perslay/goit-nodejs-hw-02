@@ -35,7 +35,7 @@ const schema = Joi.object({
   token: Joi.string().default(null),
   avatarURL: Joi.string(),
   verify: Joi.boolean().default(false),
-  verificationToken: Joi.string().required(),
+  verificationToken: Joi.string(),
 });
 
 const auth = (req, res, next) => {
@@ -93,7 +93,7 @@ const register = async (req, res, next) => {
       // to: newUser.email,
       to: "natalia.44.fedyk@gmail.com",
       subject: "Email Verification",
-      html: `<p>Please verify your email by clicking on the following link: <a href="http://your-domain.com/verify/${newToken}">Verify Email</a></p>`,
+      html: `<p>Please verify your email by clicking on the following link: <a href="http://localhost:3000/api/users/verify/${newToken}">Verify Email</a></p>`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -131,6 +131,15 @@ const login = async (req, res, next) => {
       status: "401 Unauthorized",
       responseBody: {
         message: "User with this email doesn't exist",
+      },
+    });
+  }
+
+  if (user.verify === false) {
+    return res.status(401).json({
+      status: "401 Unauthorized",
+      responseBody: {
+        message: "User is not verified",
       },
     });
   }
@@ -314,6 +323,7 @@ const updateAvatar = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   const verificationToken = req.params.verificationToken;
+  console.log(verificationToken);
   const { error } = req.body;
 
   if (error) {
@@ -354,6 +364,72 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
+const sendVerification = async (req, res, next) => {
+  const verificationSchema = schema.fork(["password"], (schema) =>
+    schema.optional()
+  );
+  // const email = req.body.email;
+  // console.log(schema.validate({ email: email }));
+  // const { error } = req.body;
+  const { error } = verificationSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      status: "400 Bad Request",
+      contentType: "application/json",
+      responseBody: {
+        message: error.message,
+      },
+    });
+  }
+
+  // // const userId = req.user._id;
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (user.verify === true) {
+      return res.status(400).json({
+        status: "400 Bad Request",
+        contentType: "application/json",
+        responseBody: {
+          message: "Verification has already been passed",
+        },
+      });
+    }
+    const newToken = uuidv4();
+    // const user = await User.findById(userId);
+
+    user.verificationToken = newToken;
+    // await newUser.setPassword(req.body.password);
+    await user.save();
+    console.log(
+      "User verification token updated and saved:",
+      user.verificationToken
+    );
+
+    const mailOptions = {
+      from: "natalia.44.fedyk@gmail.com",
+      // to: newUser.email,
+      to: "natalia.44.fedyk@gmail.com",
+      subject: "Email Verification",
+      html: `<p>Please verify your email by clicking on the following link: <a href="http://localhost:3000/api/users/verify/${newToken}">Verify Email</a></p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Verification email sent to:", user.email);
+
+    res.json({
+      status: "200 OK",
+      contentType: "application/json",
+      responseBody: {
+        message: "Verification email sent",
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -363,4 +439,5 @@ module.exports = {
   updateSub,
   updateAvatar,
   verifyEmail,
+  sendVerification,
 };
