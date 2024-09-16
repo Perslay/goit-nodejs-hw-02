@@ -90,7 +90,6 @@ const register = async (req, res, next) => {
 
     const mailOptions = {
       from: "natalia.44.fedyk@gmail.com",
-      // to: newUser.email,
       to: "natalia.44.fedyk@gmail.com",
       subject: "Email Verification",
       html: `<p>Please verify your email by clicking on the following link: <a href="http://localhost:3000/api/users/verify/${newToken}">Verify Email</a></p>`,
@@ -323,7 +322,6 @@ const updateAvatar = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   const verificationToken = req.params.verificationToken;
-  console.log(verificationToken);
   const { error } = req.body;
 
   if (error) {
@@ -349,8 +347,9 @@ const verifyEmail = async (req, res, next) => {
       });
     }
 
-    user.verificationToken = null;
     user.verify = true;
+    user.verificationToken = null;
+    await user.save();
 
     res.json({
       status: "200 OK",
@@ -368,9 +367,6 @@ const sendVerification = async (req, res, next) => {
   const verificationSchema = schema.fork(["password"], (schema) =>
     schema.optional()
   );
-  // const email = req.body.email;
-  // console.log(schema.validate({ email: email }));
-  // const { error } = req.body;
   const { error } = verificationSchema.validate(req.body);
 
   if (error) {
@@ -383,7 +379,6 @@ const sendVerification = async (req, res, next) => {
     });
   }
 
-  // // const userId = req.user._id;
   try {
     const user = await User.findOne({ email: req.body.email });
 
@@ -397,26 +392,18 @@ const sendVerification = async (req, res, next) => {
       });
     }
     const newToken = uuidv4();
-    // const user = await User.findById(userId);
 
     user.verificationToken = newToken;
-    // await newUser.setPassword(req.body.password);
     await user.save();
-    console.log(
-      "User verification token updated and saved:",
-      user.verificationToken
-    );
 
     const mailOptions = {
       from: "natalia.44.fedyk@gmail.com",
-      // to: newUser.email,
       to: "natalia.44.fedyk@gmail.com",
       subject: "Email Verification",
       html: `<p>Please verify your email by clicking on the following link: <a href="http://localhost:3000/api/users/verify/${newToken}">Verify Email</a></p>`,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Verification email sent to:", user.email);
 
     res.json({
       status: "200 OK",

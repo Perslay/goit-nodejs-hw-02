@@ -1,4 +1,5 @@
 const Contact = require("./schemas/contact-schema");
+const User = require("./schemas/user-schema");
 
 const getAllContacts = async (page = 1, limit = 20, filter = {}) => {
   const skip = (page - 1) * limit;
@@ -25,12 +26,8 @@ const updateContact = (id, fields) => {
   );
 };
 
-const getUserByVerToken = async (verificationToken) => {
-  // return User.findOne({ verificationToken: verificationToken });
-  console.log("Searching for user with verificationToken:", verificationToken);
-  const user = await User.findOne({ verificationToken: verificationToken });
-  console.log("User found:", user);
-  return user;
+const getUserByVerToken = (verificationToken) => {
+  return User.findOne({ verificationToken: verificationToken });
 };
 
 module.exports = {
